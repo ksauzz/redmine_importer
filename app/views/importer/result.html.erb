@@ -24,7 +24,10 @@
 	<% @failed_issues.each do |id, issue| -%>
 	<tr class="<%= cycle("odd", "even") %>">
 		<td><%= id %></td>
-	    <% issue.each do |column| %><%= content_tag 'td', column[1].force_encoding('UTF-8') unless column[1].nil? %><% end %>
+	    <% issue.each do |column| %>
+        <% v = column[1] ; v = v.force_encoding("UTF-8") if v.respond_to?(:force_encoding) %>
+        <%= content_tag 'td', v %>
+      <% end %>
 	</tr>
 	<% end %>
 	</tbody>

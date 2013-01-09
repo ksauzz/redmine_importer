@@ -11,3 +11,5 @@ Redmine::Plugin.register :redmine_importer do
   end
   menu :project_menu, :importer, { :controller => 'importer', :action => 'index' }, :caption => :"redmine_importer.label_import", :before => :settings, :param => :project_id
 end
+
+CSV = FCSV if RUBY_VERSION < '1.9'

@@ -1,5 +1,18 @@
 <% content_for :header_tags do %>
     <%= stylesheet_link_tag 'importer', :plugin => 'redmine_importer' %>
+    <script type="text/javascript">
+      //<![CDATA[
+      $(document).ready(function() {
+        $("#update_issue").bind("change", function() {
+          is_disabled = ($(this).attr("checked") != "checked");
+
+          $("#journal_field").attr("disabled", is_disabled);
+          $("#update_other_project").attr("disabled", is_disabled);
+          $("#ignore_non_exist").attr("disabled", is_disabled);
+        });
+      });
+      //]]>
+    </script>    
 <% end %>
 
 <h2><%= l('redmine_importer.label_match_columns') %></h2>
@@ -37,13 +50,6 @@
     <label><%= check_box_tag "add_versions", true, false %> <%= l('redmine_importer.label_importer_add_versions') %> </label><br/>		
 		<label><%= check_box_tag "update_issue", true, false %> <%= l('redmine_importer.label_update_issue') %>
 		</label><br/>
-		<%= observe_field("update_issue", :function => <<END_OF_STRING
-document.getElementById("journal_field").disabled = !element.checked;
-document.getElementById("update_other_project").disabled = !element.checked;
-document.getElementById("ignore_non_exist").disabled = !element.checked;
-END_OF_STRING
-)
-		%>
 		
 		&nbsp;&nbsp;&nbsp;&nbsp;<label><%= l('redmine_importer.label_journal_field') %>
 		<%= select_tag "journal_field", "<option value=\"\">#{l('redmine_importer.option_ignore')}</option>" + options_for_select(@headers), {:disabled => true} %></label><br/>
@@ -74,7 +80,10 @@ END_OF_STRING
 	<tbody>
 	<% @samples.each do |issue| -%>
 	<tr class="<%= cycle("odd", "even") %>">
-	    <% issue.each do |column| %><%= content_tag 'td', column[1].force_encoding("UTF-8") unless column[1].nil? %><% end %>
+	    <% issue.each do |column| %>
+        <% v = column[1] ; v = v.force_encoding("UTF-8") if v.respond_to?(:force_encoding) %>
+        <%= content_tag 'td', v %>
+      <% end %>
 	</tr>
 	<% end %>
 	<tr class="<%= cycle("odd", "even") %>">

@@ -65,7 +65,9 @@ class ImporterController < ApplicationController
     i = 0
     @samples = []
     
-    CSV.parse(iip.csv_data.force_encoding("UTF-8"), {:headers=>true,
+    csv_data = iip.csv_data
+    csv_data.force_encoding("UTF-8") if csv_data.respond_to?(:force_encoding)
+    CSV.parse(csv_data, {:headers=>true,
     :quote_char=>iip.quote_char, :col_sep=>iip.col_sep}).each do |row|
       @samples[i] = row
      
@@ -208,6 +210,10 @@ class ImporterController < ApplicationController
 
     # attrs_map is fields_map's invert
     attrs_map = fields_map.invert
+    attrs_map = Marshal.load(Marshal.dump(fields_map.invert))
+    attrs_map.values.each do |v|
+      v.force_encoding('utf-8') if v.respond_to?(:force_encoding)
+    end
 
     # check params
     unique_error = nil
@@ -228,7 +234,9 @@ class ImporterController < ApplicationController
       return
     end
 
-    CSV.parse(iip.csv_data.force_encoding("UTF-8"), {:headers=>true,
+    csv_data = iip.csv_data
+    csv_data.force_encoding("UTF-8") if csv_data.respond_to?(:force_encoding)
+    CSV.parse(csv_data, {:headers=>true,
         :quote_char=>iip.quote_char, :col_sep=>iip.col_sep}).each do |row|
 
       project = Project.find_by_name(row[attrs_map["project"]])
@@ -249,7 +257,7 @@ class ImporterController < ApplicationController
         end
         assigned_to = row[attrs_map["assigned_to"]] != nil ? user_for_login!(row[attrs_map["assigned_to"]]) : nil
         fixed_version_name = row[attrs_map["fixed_version"]]
-        fixed_version_id = !fixed_version_name.empty? ? version_id_for_name!(project,fixed_version_name,add_versions) : nil
+        fixed_version_id = !fixed_version_name.blank? ? version_id_for_name!(project,fixed_version_name,add_versions) : nil
         watchers = row[attrs_map["watchers"]]
         # new issue or find exists one
         issue = Issue.new
